@@ -29,7 +29,7 @@ def populate_counties(json_filename, output_filename=None):
         
         updated_count = 0
         not_found_count = 0
-        cache = {}  # Cache zip code lookups for better performance
+        cache = {}  # Cache zip code lookups for better performance, key: (zipcode, state)
         
         for i, record in enumerate(data):
             if (i + 1) % 10000 == 0:
@@ -41,9 +41,12 @@ def populate_counties(json_filename, output_filename=None):
             if not zipcode:
                 continue
             
+            # Use composite cache key for state-specific lookups
+            cache_key = (zipcode, state)
+            
             # Check cache first
-            if zipcode in cache:
-                county = cache[zipcode]
+            if cache_key in cache:
+                county = cache[cache_key]
             else:
                 # Look up the county
                 county = None
@@ -61,12 +64,12 @@ def populate_counties(json_filename, output_filename=None):
                         # If no state match or state not provided, use first result
                         if county is None and results:
                             county = results[0].get('county', '')
-                except (ValueError, Exception):
+                except ValueError:
                     # Invalid zip code format, skip
                     pass
                 
                 # Cache the result (even if None)
-                cache[zipcode] = county
+                cache[cache_key] = county
             
             # Update the record if county was found
             if county:

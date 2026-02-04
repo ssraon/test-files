@@ -35,7 +35,7 @@ def convert_csv_to_json(csv_filename, json_filename):
                 continue
         
         if csv_file is None:
-            raise Exception("Could not open file with any supported encoding")
+            raise Exception(f"Could not open file with any of the following encodings: {', '.join(encodings)}")
         
         with csv_file:
             csv_reader = csv.DictReader(csv_file)
